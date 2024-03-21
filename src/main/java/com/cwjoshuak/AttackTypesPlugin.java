@@ -6,9 +6,7 @@ import javax.inject.Inject;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.VarPlayer;
-import net.runelite.api.Varbits;
+import net.runelite.api.*;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -16,7 +14,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-import static com.cwjoshuak.WeaponStyle.*;
 
 @Slf4j
 @PluginDescriptor(
@@ -62,32 +59,26 @@ public class AttackTypesPlugin extends Plugin
 			final int currentAttackStyleVarbit = client.getVarpValue(VarPlayer.ATTACK_STYLE);
 			final int currentEquippedWeaponTypeVarbit = client.getVarbitValue(Varbits.EQUIPPED_WEAPON_TYPE);
 			final int currentCastingModeVarbit = client.getVarbitValue(Varbits.DEFENSIVE_CASTING_MODE);
-
 			equippedWeaponTypeVarbit = currentEquippedWeaponTypeVarbit;
 			updateAttackStyle(equippedWeaponTypeVarbit, currentAttackStyleVarbit, currentCastingModeVarbit);
 		}
 	}
 	private void updateAttackStyle(int equippedWeaponType, int attackStyleIndex, int castingMode)
 	{
-		WeaponStyle weaponStyle = null;
-		WeaponStyle[] weaponStyles = WeaponType.getWeaponType(equippedWeaponType).getWeaponStyles();
+		boolean isDefensiveCasting = castingMode == 1 && attackStyleIndex == 4;
+
 		AttackType[] attackTypes = WeaponAttackType.getWeaponAttackType(equippedWeaponType).getAttackTypes();
-		if (attackStyleIndex < weaponStyles.length)
-		{
-			weaponStyle = weaponStyles[attackStyleIndex];
-		}
 		if (attackStyleIndex < attackTypes.length)
 		{
 			attackType = attackTypes[attackStyleIndex];
 		}
-
+		else if (attackStyleIndex == 4 || isDefensiveCasting)
+		{
+			attackType = AttackType.MAGIC;
+		}
 		if (attackType == null)
 		{
 			attackType = AttackType.NONE;
-		}
-		else if (weaponStyle == CASTING && castingMode == 1)
-		{
-			attackType = AttackType.MAGIC;
 		}
 	}
 }
